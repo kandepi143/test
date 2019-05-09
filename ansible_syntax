@@ -1,0 +1,51 @@
+==> tags <==
+
+---
+ - hosts: all
+   become: yes
+   tasks:
+	- name: install_httpd
+	  yum: name=httpd state=resent
+	  tags: install
+
+	- name: copy_index.html
+	  copy: src=/opt/index.html dest=/var/www/html/index.html
+     	  tags: copy
+
+	- name: restart_httpd
+	  service: name=httpd state=restarted
+	  tags: restart
+
+$ ansible-playbook httpd.yml --syntax-check
+$ ansible-playbook httpd.yml
+$ ansible-playbook httpd.yml --tags copy,restart
+$ ansible-playbook httpd.yml --skip-tags install
+
+---------------------------------------------------------------------------
+==> handlers <==
+
+---
+ - hosts: all
+   become: yes
+   tasks: 
+	- name: install_httpd
+	  yum: name=httpd state=present
+	  tags: install
+	 
+	- name: copy_index.html
+	  copy:
+	     src: /opt/index.html
+	     dest: /var/www/html/index.html
+	  tags: copy
+	  notify: 
+	     - restart_httpd
+
+		
+   handlers:
+	- name: restart_httpd
+	  service: name=httpd state=restarted
+
+
+ 
+
+
